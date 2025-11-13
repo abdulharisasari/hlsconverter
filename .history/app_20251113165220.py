@@ -232,16 +232,9 @@ def ping_stream(stream_id):
 
 # ==============================
 # MAIN ENTRY
-# # ==============================
-# if __name__ == "__main__":
-#     from waitress import serve
-#     Thread(target=auto_cleanup_hls, daemon=True).start()
-
-#     app.run(host="0.0.0.0", port=2881, debug=True)
-
+# ==============================
 if __name__ == "__main__":
-    from waitress import serve  # import waitress untuk production-ready server
+    from waitress import serve
     Thread(target=auto_cleanup_hls, daemon=True).start()
-    
-    # Jalankan server dengan Waitress
-    serve(app, host="0.0.0.0", port=2881)
+
+    app.run(host="0.0.0.0", port=2881, debug=True)

@@ -7,6 +7,7 @@ from flask import Flask, request, jsonify, render_template_string
 from threading import Thread
 from datetime import datetime
 from flask_cors import CORS
+import requests
 
 app = Flask(__name__)
 CORS(app)
@@ -81,14 +82,51 @@ def auto_cleanup_hls():
         remove_old_streams()
         time.sleep(CLEANUP_INTERVAL)
 
+def get_public_ip():
+    """Dapatkan IP publik server secara otomatis"""
+    try:
+        response = requests.get("https://api.ipify.org?format=text", timeout=5)
+        if response.status_code == 200:
+            return response.text.strip()
+    except Exception as e:
+        print(f"[ERROR] Gagal dapatkan IP publik: {e}")
+    return None
+
 
 # ==============================
 # ENDPOINT API
 # ==============================
+# @app.route("/convertStream", methods=["POST"])
+# def convert_stream():
+#     data = request.get_json(silent=True) or request.form
+#     link = data.get("link", "")
+#     if not link:
+#         return jsonify({"error": "Parameter 'link' wajib diisi"}), 400
 
-@app.route("/")
-def hello_world():
-    return "Hello World! Server berjalan dengan Waitress."
+#     # Buat ID unik
+#     stream_id = hashlib.md5(link.encode()).hexdigest()[:10]
+
+#     # Jika belum aktif, jalankan FFmpeg
+#     if stream_id not in active_streams:
+#         thread = Thread(target=run_ffmpeg_to_hls, args=(link, stream_id), daemon=True)
+#         thread.start()
+#         active_streams[stream_id] = {
+#             "source": link,
+#             "time": datetime.now(),
+#             "is_played": False,
+#             "last_access": datetime.now()
+#         }
+
+#     base_url = request.host_url.rstrip("/")
+
+#     return jsonify({
+#         "id": stream_id,
+#         "status": "conversion_started",
+#         "hls_url": f"{base_url}/static/hls/{stream_id}/index.m3u8",
+#         "player_url": f"{base_url}/play/{stream_id}",
+#         "start_time": active_streams[stream_id]["time"].strftime("%Y-%m-%d %H:%M:%S")
+#     })
+
 
 @app.route("/convertStream", methods=["POST"])
 def convert_stream():
@@ -111,13 +149,19 @@ def convert_stream():
             "last_access": datetime.now()
         }
 
-    base_url = request.host_url.rstrip("/")
+    # Dapatkan IP publik
+    public_ip = get_public_ip() or request.host.split(":")[0]
+    base_url = f"http://{public_ip}:2881"
+
+    player_url = f"{base_url}/livestream/iOS/{stream_id}"
+
+    # tampilkan di log
+    print(f"[NEW STREAM] Stream ID: {stream_id} | Player URL (Public): {player_url}")
 
     return jsonify({
         "id": stream_id,
         "status": "conversion_started",
-        "hls_url": f"{base_url}/static/hls/{stream_id}/index.m3u8",
-        "player_url": f"{base_url}/play/{stream_id}",
+        "player_url": player_url,
         "start_time": active_streams[stream_id]["time"].strftime("%Y-%m-%d %H:%M:%S")
     })
 
@@ -230,18 +274,10 @@ def ping_stream(stream_id):
         active_streams[stream_id]["last_access"] = datetime.now()
     return "", 204
 
+
 # ==============================
 # MAIN ENTRY
-# # ==============================
-# if __name__ == "__main__":
-#     from waitress import serve
-#     Thread(target=auto_cleanup_hls, daemon=True).start()
-
-#     app.run(host="0.0.0.0", port=2881, debug=True)
-
+# ==============================
 if __name__ == "__main__":
-    from waitress import serve  # import waitress untuk production-ready server
     Thread(target=auto_cleanup_hls, daemon=True).start()
-    
-    # Jalankan server dengan Waitress
-    serve(app, host="0.0.0.0", port=2881)
+    app.run(host="0.0.0.0", port=2881, debug=True)

@@ -7,6 +7,7 @@ from flask import Flask, request, jsonify, render_template_string
 from threading import Thread
 from datetime import datetime
 from flask_cors import CORS
+import requests
 
 app = Flask(__name__)
 CORS(app)
@@ -81,15 +82,20 @@ def auto_cleanup_hls():
         remove_old_streams()
         time.sleep(CLEANUP_INTERVAL)
 
+def get_public_ip():
+    """Dapatkan IP publik server secara otomatis"""
+    try:
+        response = requests.get("https://api.ipify.org?format=text", timeout=5)
+        if response.status_code == 200:
+            return response.text.strip()
+    except Exception as e:
+        print(f"[ERROR] Gagal dapatkan IP publik: {e}")
+    return None
+
 
 # ==============================
 # ENDPOINT API
 # ==============================
-
-@app.route("/")
-def hello_world():
-    return "Hello World! Server berjalan dengan Waitress."
-
 @app.route("/convertStream", methods=["POST"])
 def convert_stream():
     data = request.get_json(silent=True) or request.form
@@ -230,18 +236,10 @@ def ping_stream(stream_id):
         active_streams[stream_id]["last_access"] = datetime.now()
     return "", 204
 
+
 # ==============================
 # MAIN ENTRY
-# # ==============================
-# if __name__ == "__main__":
-#     from waitress import serve
-#     Thread(target=auto_cleanup_hls, daemon=True).start()
-
-#     app.run(host="0.0.0.0", port=2881, debug=True)
-
+# ==============================
 if __name__ == "__main__":
-    from waitress import serve  # import waitress untuk production-ready server
     Thread(target=auto_cleanup_hls, daemon=True).start()
-    
-    # Jalankan server dengan Waitress
-    serve(app, host="0.0.0.0", port=2881)
+    app.run(host="0.0.0.0", port=2881, debug=True)

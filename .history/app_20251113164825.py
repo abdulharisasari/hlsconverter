@@ -86,10 +86,6 @@ def auto_cleanup_hls():
 # ENDPOINT API
 # ==============================
 
-@app.route("/")
-def hello_world():
-    return "Hello World! Server berjalan dengan Waitress."
-
 @app.route("/convertStream", methods=["POST"])
 def convert_stream():
     data = request.get_json(silent=True) or request.form
@@ -230,18 +226,13 @@ def ping_stream(stream_id):
         active_streams[stream_id]["last_access"] = datetime.now()
     return "", 204
 
+@app.route("/")
+def hello_world():
+    return "Hello World! Server berjalan dengan Waitress."
+
 # ==============================
 # MAIN ENTRY
-# # ==============================
-# if __name__ == "__main__":
-#     from waitress import serve
-#     Thread(target=auto_cleanup_hls, daemon=True).start()
-
-#     app.run(host="0.0.0.0", port=2881, debug=True)
-
+# ==============================
 if __name__ == "__main__":
-    from waitress import serve  # import waitress untuk production-ready server
     Thread(target=auto_cleanup_hls, daemon=True).start()
-    
-    # Jalankan server dengan Waitress
-    serve(app, host="0.0.0.0", port=2881)
+    app.run(host="0.0.0.0", port=2881, debug=True)

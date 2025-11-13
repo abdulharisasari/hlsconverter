@@ -85,11 +85,6 @@ def auto_cleanup_hls():
 # ==============================
 # ENDPOINT API
 # ==============================
-
-@app.route("/")
-def hello_world():
-    return "Hello World! Server berjalan dengan Waitress."
-
 @app.route("/convertStream", methods=["POST"])
 def convert_stream():
     data = request.get_json(silent=True) or request.form
@@ -111,13 +106,20 @@ def convert_stream():
             "last_access": datetime.now()
         }
 
-    base_url = request.host_url.rstrip("/")
+    # base_url = request.host_url.rstrip("/")
+    PUBLIC_IP = "203.0.113.10"  # ganti dengan IP publik atau domain
+    base_url = f"http://{PUBLIC_IP}:2881"
+
+    player_url = f"{base_url}/livestream/iOS/{stream_id}"
+
+    # tampilkan di log
+    print(f"[NEW STREAM] Stream ID: {stream_id} | Player URL: {player_url}")
 
     return jsonify({
         "id": stream_id,
         "status": "conversion_started",
-        "hls_url": f"{base_url}/static/hls/{stream_id}/index.m3u8",
-        "player_url": f"{base_url}/play/{stream_id}",
+        # "hls_url": f"{base_url}/static/hls/{stream_id}/index.m3u8",
+        "player_url": f"{base_url}/livestream/iOS/{stream_id}",
         "start_time": active_streams[stream_id]["time"].strftime("%Y-%m-%d %H:%M:%S")
     })
 
@@ -139,7 +141,7 @@ def list_streams():
     ])
 
 
-@app.route("/play/<stream_id>")
+@app.route("/livestream/iOS/<stream_id>")
 def play_stream(stream_id):
     """Render halaman player HLS"""
     if stream_id not in active_streams:
@@ -230,18 +232,10 @@ def ping_stream(stream_id):
         active_streams[stream_id]["last_access"] = datetime.now()
     return "", 204
 
+
 # ==============================
 # MAIN ENTRY
-# # ==============================
-# if __name__ == "__main__":
-#     from waitress import serve
-#     Thread(target=auto_cleanup_hls, daemon=True).start()
-
-#     app.run(host="0.0.0.0", port=2881, debug=True)
-
+# ==============================
 if __name__ == "__main__":
-    from waitress import serve  # import waitress untuk production-ready server
     Thread(target=auto_cleanup_hls, daemon=True).start()
-    
-    # Jalankan server dengan Waitress
-    serve(app, host="0.0.0.0", port=2881)
+    app.run(host="0.0.0.0", port=2881, debug=False)

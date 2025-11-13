@@ -85,10 +85,63 @@ def auto_cleanup_hls():
 # ==============================
 # ENDPOINT API
 # ==============================
-
-@app.route("/")
-def hello_world():
-    return "Hello World! Server berjalan dengan Waitress."
+@app.route("/", methods=["GET"])
+def server_status_web():
+    """Halaman web untuk cek status server"""
+    html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Server Status</title>
+        <style>
+            body {{
+                font-family: Arial, sans-serif;
+                background: #f4f4f4;
+                color: #333;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                height: 100vh;
+                margin: 0;
+            }}
+            h1 {{
+                color: #2c3e50;
+            }}
+            .info {{
+                background: #fff;
+                padding: 20px 40px;
+                border-radius: 10px;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+                text-align: center;
+            }}
+            table {{
+                margin-top: 10px;
+                border-collapse: collapse;
+                width: 100%;
+            }}
+            th, td {{
+                border: 1px solid #ccc;
+                padding: 8px 12px;
+            }}
+            th {{
+                background: #eee;
+            }}
+        </style>
+    </head>
+    <body>
+        <h1>Server Status</h1>
+        <div class="info">
+            <p><strong>Status:</strong> OK ✅</p>
+            <p><strong>Server Time:</strong> {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</p>
+            <p><strong>Active Streams:</strong> {len(active_streams)}</p>
+            {generate_stream_table()}
+        </div>
+    </body>
+    </html>
+    """
+    return html
 
 @app.route("/convertStream", methods=["POST"])
 def convert_stream():
@@ -230,18 +283,10 @@ def ping_stream(stream_id):
         active_streams[stream_id]["last_access"] = datetime.now()
     return "", 204
 
+
 # ==============================
 # MAIN ENTRY
-# # ==============================
-# if __name__ == "__main__":
-#     from waitress import serve
-#     Thread(target=auto_cleanup_hls, daemon=True).start()
-
-#     app.run(host="0.0.0.0", port=2881, debug=True)
-
+# ==============================
 if __name__ == "__main__":
-    from waitress import serve  # import waitress untuk production-ready server
     Thread(target=auto_cleanup_hls, daemon=True).start()
-    
-    # Jalankan server dengan Waitress
-    serve(app, host="0.0.0.0", port=2881)
+    app.run(host="0.0.0.0", port=2881, debug=True)
