@@ -106,9 +106,7 @@ def convert_stream():
             "last_access": datetime.now()
         }
 
-    # base_url = request.host_url.rstrip("/")
-    base_url = "http://124.158.175.82"  # IP publik server kamu
-
+    base_url = request.host_url.rstrip("/")
 
     return jsonify({
         "id": stream_id,

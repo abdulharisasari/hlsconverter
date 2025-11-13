@@ -107,7 +107,7 @@ def convert_stream():
         }
 
     # base_url = request.host_url.rstrip("/")
-    base_url = "http://124.158.175.82"  # IP publik server kamu
+    base_url = "http://124.158.175.82:2881"  # IP publik server kamu
 
 
     return jsonify({

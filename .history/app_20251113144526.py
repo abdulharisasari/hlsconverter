@@ -106,15 +106,13 @@ def convert_stream():
             "last_access": datetime.now()
         }
 
-    # base_url = request.host_url.rstrip("/")
-    base_url = "http://124.158.175.82"  # IP publik server kamu
-
+    base_url = request.host_url.rstrip("/")
 
     return jsonify({
         "id": stream_id,
         "status": "conversion_started",
-        # "hls_url": f"{base_url}/static/hls/{stream_id}/index.m3u8",
-        "player_url": f"{base_url}/livestream/iOS/{stream_id}",
+        "hls_url": f"{base_url}/static/hls/{stream_id}/index.m3u8",
+        "player_url": f"{base_url}/play/{stream_id}",
         "start_time": active_streams[stream_id]["time"].strftime("%Y-%m-%d %H:%M:%S")
     })
 
