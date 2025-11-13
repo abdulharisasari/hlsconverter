@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Live HLS Streaming</title>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+</head>
+<body>
+  <h2>Live Streaming HLS</h2>
+  <label>Masukkan URL source live stream:</label><br/>
+  <input id="sourceUrl" type="text" size="80" placeholder="contoh: https://i-see.iconpln.co.id/jeyns/media?...&t=live"/>
+  <button onclick="startConvert()">Start Streaming</button>
+
+  <hr/>
+  <video id="video" width="640" controls autoplay></video>
+
+  <script>
+  async function startConvert() {
+    const src = document.getElementById('sourceUrl').value;
+    if (!src) return alert("Masukkan URL source");
+
+    const res = await fetch('/convert', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ source: src })
+    });
+    const data = await res.json();
+    alert("Streaming started! Kamu bisa share link ini: " + data.player_url);
+
+    playHls('/static/hls/live/index.m3u8');
+  }
+
+  function playHls(hlsUrl) {
+    const video = document.getElementById('video');
+
+    if (Hls.isSupported()) {
+      const hls = new Hls();
+      hls.loadSource(hlsUrl);
+      hls.attachMedia(video);
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      // Safari/iOS native HLS
+      video.src = hlsUrl;
+    } else {
+      alert("Browser kamu tidak mendukung HLS secara native. Gunakan Chrome/Edge/Firefox dengan halaman ini atau Safari.");
+    }
+  }
+  </script>
+</body>
+</html>

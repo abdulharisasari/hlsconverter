@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Live Stream Converter</title>
+</head>
+<body>
+  <h2>Converter Live Stream → HLS</h2>
+  <input id="sourceUrl" type="text" size="80" placeholder="Masukkan URL live stream"/>
+  <button onclick="startConvert()">Start Convert</button>
+
+  <script>
+  async function startConvert() {
+    const src = document.getElementById('sourceUrl').value;
+    if (!src) return alert("Masukkan URL source");
+
+    const res = await fetch('/start', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ source: src })
+    });
+    const data = await res.json();
+    if (data.player_url) {
+      alert("Streaming started! Buka halaman player: " + data.player_url);
+      window.location.href = data.player_url;
+    }
+  }
+  </script>
+</body>
+</html>

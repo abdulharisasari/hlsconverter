@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>HLS Player</title>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <style>
+    body { background:#000; margin:0; display:flex; align-items:center; justify-content:center; height:100vh; }
+    video { width:90vw; max-width:900px; border-radius:10px; }
+  </style>
+</head>
+<body>
+  <video id="video" controls autoplay playsinline></video>
+
+  <script>
+    const streamId = "{{ stream_id }}";
+    const video = document.getElementById('video');
+    const hlsUrl = `/static/hls/${streamId}/index.m3u8`;
+
+    // tandai sedang nonton
+    fetch(`/watch/${streamId}/start`, { method: 'POST' });
+
+    if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = hlsUrl;
+      video.play();
+    } else if (Hls.isSupported()) {
+      const hls = new Hls();
+      hls.loadSource(hlsUrl);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+    } else {
+      alert("Browser tidak mendukung HLS.");
+    }
+
+    // Saat tab ditutup, stop nonton
+    window.addEventListener("beforeunload", () => {
+      navigator.sendBeacon(`/watch/${streamId}/stop`);
+    });
+  </script>
+</body>
+</html>

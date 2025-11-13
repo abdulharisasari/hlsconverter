@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Live Stream to HLS Converter</title>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+</head>
+<body>
+  <h2>Live Stream → HLS Converter</h2>
+  <label>Source URL:</label><br/>
+  <input id="sourceUrl" type="text" size="100"
+         placeholder="Masukkan URL stream di sini (misal dari CCTV, RTSP, atau API)"/>
+  <br/><br/>
+  <button onclick="startConvert()">Start Convert</button>
+
+  <hr/>
+  <h3>Preview:</h3>
+  <video id="video" width="640" controls autoplay></video>
+
+  <script>
+  async function startConvert() {
+    const src = document.getElementById('sourceUrl').value;
+    if (!src) return alert("Masukkan URL sumber dulu");
+
+    const res = await fetch('/convert', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ source: src })
+    });
+    const data = await res.json();
+
+    if (data.hls_url) {
+      playHls(data.hls_url);
+    } else {
+      alert("Gagal mulai konversi: " + (data.error || "unknown error"));
+    }
+  }
+
+  function playHls(hlsUrl) {
+    const video = document.getElementById('video');
+    if (Hls.isSupported()) {
+      const hls = new Hls();
+      hls.loadSource(hlsUrl);
+      hls.attachMedia(video);
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = hlsUrl;
+    }
+  }
+  </script>
+</body>
+</html>

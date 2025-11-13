@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>HLS Stream Manager</title>
+  <style>
+    body { font-family: Arial; background:#f2f2f2; padding:30px; }
+    h2 { text-align:center; }
+    input { width:70%; padding:8px; }
+    button { padding:8px 12px; }
+    ul { list-style:none; padding:0; }
+    li { margin:10px 0; background:white; padding:10px; border-radius:6px; display:flex; justify-content:space-between; }
+    a { text-decoration:none; color:#007bff; }
+  </style>
+</head>
+<body>
+  <h2>Daftar Streaming Aktif</h2>
+
+  <div style="text-align:center;margin-bottom:20px;">
+    <input type="text" id="source" placeholder="Masukkan URL streaming...">
+    <button onclick="addStream()">Convert</button>
+  </div>
+
+  <ul id="streamList">
+    {% for s in streams %}
+      <li>
+        <span>{{ s.source }}</span>
+        <a href="{{ s.player_url }}" target="_blank">Tonton Stream</a>
+      </li>
+    {% endfor %}
+  </ul>
+
+  <script>
+    async function addStream() {
+      const src = document.getElementById('source').value.trim();
+      if (!src) return alert("Masukkan URL streaming!");
+      const res = await fetch("/convert", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({source: src})
+      });
+      const data = await res.json();
+      if (data.error) return alert(data.error);
+
+      const ul = document.getElementById("streamList");
+      const li = document.createElement("li");
+      li.innerHTML = `<span>${data.source}</span> <a href="${data.player_url}" target="_blank">Tonton Stream</a>`;
+      ul.appendChild(li);
+      document.getElementById('source').value = "";
+    }
+  </script>
+</body>
+</html>

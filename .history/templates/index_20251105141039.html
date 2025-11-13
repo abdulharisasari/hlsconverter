@@ -1,0 +1,73 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>HLS Streaming Player</title>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+</head>
+<body>
+  <h3>HLS Streaming Player</h3>
+
+  <label>Source URL (Live/Video):</label><br/>
+  <input id="source" style="width:90%" 
+         placeholder="Masukkan URL sumber (contoh: https://example.com/live/stream.mp4)"/><br/><br/>
+
+  <label>Stream ID:</label><br/>
+  <input id="sid" value="stream1z"/><br/><br/>
+  
+  <button id="start">Start Streaming</button>
+
+  <h4>Live Stream Player</h4>
+  <video id="video" controls autoplay playsinline style="width:80%;height:auto;background:#000"></video>
+
+  <script>
+    document.getElementById("start").onclick = async () => {
+      const source = document.getElementById("source").value.trim();
+      const sid = document.getElementById("sid").value.trim() || "stream1";
+
+      if (!source) {
+        alert("Masukkan URL sumber video!");
+        return;
+      }
+
+      // Kirim request ke server untuk mulai konversi ke HLS
+      const resp = await fetch("/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ source, stream_id: sid })
+      });
+
+      const j = await resp.json();
+      if (!j.ok) {
+        alert("Error: " + j.msg);
+        return;
+      }
+
+      // URL manifest (m3u8)
+      const manifest = j.manifest_url;
+      const video = document.getElementById("video");
+
+      // Tampilkan link agar bisa dicek manual juga
+      console.log("Streaming manifest:", manifest);
+
+      // Streaming menggunakan hls.js
+      if (Hls.isSupported()) {
+        const hls = new Hls({
+          liveSyncDuration: 2,
+          enableWorker: true,
+          xhrSetup: function (xhr, url) {
+            xhr.withCredentials = false; // jangan paksa download
+          }
+        });
+        hls.loadSource(manifest);
+        hls.attachMedia(video);
+      } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+        // Untuk Safari / iOS native HLS
+        video.src = manifest;
+      } else {
+        alert("Browser tidak mendukung HLS streaming");
+      }
+    };
+  </script>
+</body>
+</html>

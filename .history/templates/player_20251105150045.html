@@ -1,0 +1,112 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>HLS Player</title>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <style>
+    body { background:#000; margin:0; display:flex; align-items:center; justify-content:center; height:100vh; }
+    video { width:90vw; max-width:900px; border-radius:10px; }
+    #status { position:absolute; top:20px; left:20px; color:white; background:rgba(0,0,0,0.4); padding:5px 10px; border-radius:4px; }
+  </style>
+</head>
+<body>
+  <div id="status">Menyiapkan stream...</div>
+  <video id="video" controls autoplay playsinline></video>
+
+  <script>
+    const streamId = "{{ stream_id }}";
+    const hlsUrl = `/static/hls/${streamId}/index.m3u8`;
+    const status = document.getElementById('status');
+    const video = document.getElementById('video');
+    let retryCount = 0;
+    const maxRetries = 3;
+    let checkInterval = null;
+    let originalSource = "";
+
+    // 🔹 Ambil URL sumber asli
+    async function getSourceUrl() {
+      const res = await fetch(`/api/source/${streamId}`);
+      if (res.ok) {
+        const data = await res.json();
+        originalSource = data.source;
+      }
+    }
+
+    // 🔹 Cek apakah file HLS sudah tersedia
+    async function checkHlsExists() {
+      try {
+        const res = await fetch(hlsUrl, { method: 'HEAD', cache: "no-store" });
+        return res.ok;
+      } catch {
+        return false;
+      }
+    }
+
+    // 🔹 Mulai player
+    async function initPlayer() {
+      status.textContent = "Memeriksa ketersediaan stream...";
+      const available = await checkHlsExists();
+
+      if (!available) {
+        if (retryCount < maxRetries) {
+          retryCount++;
+          status.textContent = `Stream belum siap (percobaan ${retryCount}/${maxRetries})...`;
+          await fetch("/convert", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ source: originalSource })
+          });
+          setTimeout(initPlayer, 3000); // 🔁 coba lagi setelah 3 detik
+        } else {
+          status.textContent = "Gagal menyiapkan stream setelah beberapa percobaan.";
+        }
+        return;
+      }
+
+      // kalau sudah ada file index.m3u8
+      status.textContent = "Memuat stream...";
+      playHls();
+    }
+
+    // 🔹 Play stream (auto retry kalau gagal)
+    function playHls() {
+      fetch(`/watch/${streamId}/start`, { method: 'POST' });
+
+      if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(hlsUrl);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          status.textContent = "Sedang memutar stream...";
+          video.play();
+        });
+        hls.on(Hls.Events.ERROR, async (event, data) => {
+          if (data.details === 'manifestLoadError' || data.type === 'networkError') {
+            status.textContent = "Stream belum siap, mencoba ulang...";
+            retryCount++;
+            if (retryCount <= maxRetries) {
+              setTimeout(initPlayer, 3000);
+            } else {
+              status.textContent = "Gagal memuat stream setelah beberapa percobaan.";
+            }
+          }
+        });
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = hlsUrl;
+        video.play();
+      } else {
+        status.textContent = "Browser tidak mendukung HLS.";
+      }
+
+      video.addEventListener("ended", () => {
+        status.textContent = "Stream selesai.";
+        fetch(`/watch/${streamId}/stop`, { method: 'POST' });
+      });
+    }
+
+    // Jalankan otomatis
+    getSourceUrl().then(initPlayer);
+  </script>
+</body>
+</html>

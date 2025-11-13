@@ -1,0 +1,104 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>HLS Player</title>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <style>
+    body { background:#000; margin:0; display:flex; align-items:center; justify-content:center; height:100vh; }
+    video { width:90vw; max-width:900px; border-radius:10px; }
+    #status { position: absolute; top: 20px; left: 20px; color: white; background: rgba(0,0,0,0.5); padding: 6px 10px; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <div id="status">Memuat stream...</div>
+  <video id="video" controls autoplay playsinline></video>
+
+  <script>
+    const streamId = "{{ stream_id }}";
+    const video = document.getElementById('video');
+    const status = document.getElementById('status');
+    const hlsUrl = `/static/hls/${streamId}/index.m3u8`;
+
+    let retryCount = 0;
+    const maxRetries = 3;
+
+    async function initPlayer() {
+      status.textContent = `Memuat stream... (percobaan ${retryCount + 1}/${maxRetries})`;
+
+      // tandai sedang menonton
+      fetch(`/watch/${streamId}/start`, { method: 'POST' });
+
+      try {
+        if (video.canPlayType('application/vnd.apple.mpegurl')) {
+          video.src = hlsUrl;
+          video.play().catch(() => handleError("Gagal autoplay"));
+        } else if (Hls.isSupported()) {
+          const hls = new Hls();
+          hls.loadSource(hlsUrl);
+          hls.attachMedia(video);
+          hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            video.play().catch(() => handleError("Gagal play"));
+          });
+          hls.on(Hls.Events.ERROR, (event, data) => {
+            console.warn("HLS error:", data);
+            handleError("HLS error");
+          });
+        } else {
+          handleError("Browser tidak mendukung HLS");
+        }
+      } catch (err) {
+        handleError(err.message);
+      }
+
+      // Jika player native error (contoh: file hilang)
+      video.addEventListener("error", () => handleError("Video error"));
+    }
+
+    async function handleError(reason) {
+      retryCount++;
+      if (retryCount > maxRetries) {
+        status.textContent = `Gagal memutar stream setelah ${maxRetries} percobaan.`;
+        console.error("Stream gagal setelah 3x percobaan.");
+        return;
+      }
+
+      status.textContent = `Terjadi kesalahan: ${reason}. Mencoba ulang (${retryCount}/${maxRetries})...`;
+
+      // Convert ulang
+      try {
+        const res = await fetch("/convert", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ source: window.originalSource || "" })
+        });
+        if (res.ok) {
+          console.log("Convert ulang dikirim.");
+          setTimeout(() => location.reload(), 3000); // refresh otomatis setelah 3 detik
+        } else {
+          console.error("Gagal request convert ulang.");
+        }
+      } catch (e) {
+        console.error("Gagal koneksi ke server:", e);
+      }
+    }
+
+    // Ambil URL sumber dari server (agar bisa re-convert)
+    async function getSourceUrl() {
+      const res = await fetch(`/api/source/${streamId}`);
+      if (res.ok) {
+        const data = await res.json();
+        window.originalSource = data.source;
+      }
+    }
+
+    // Saat tab ditutup, stop nonton
+    window.addEventListener("beforeunload", () => {
+      navigator.sendBeacon(`/watch/${streamId}/stop`);
+    });
+
+    // Jalankan
+    getSourceUrl().then(initPlayer);
+  </script>
+</body>
+</html>
