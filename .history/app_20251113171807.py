@@ -86,7 +86,7 @@ def auto_cleanup_hls():
 # ENDPOINT API
 # ==============================
 
-@app.route("/", methods=["GET"])
+@app.route("/")
 def hello_world():
     return "Hello World! Server berjalan dengan Waitress."
 

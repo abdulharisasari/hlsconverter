@@ -237,7 +237,7 @@ if __name__ == "__main__":
     from waitress import serve
     Thread(target=auto_cleanup_hls, daemon=True).start()
 
-    app.run(host="0.0.0.0", port=2881, debug=True)
+    app.run(host="0.0.0.0", port=80, debug=True)
 
 # if __name__ == "__main__":
 #     from waitress import serve
