@@ -44,33 +44,17 @@ def run_ffmpeg_to_hls(source_url: str, stream_id: str):
     output_dir = create_hls_folder(stream_id)
     output_file = os.path.join(output_dir, "index.m3u8")
 
-    # cmd = [
-    #     "ffmpeg", "-y",
-    #     "-i", source_url,
-    #     "-c", "copy",
-    #     "-f", "hls",
-    #     "-hls_time", "4",
-    #     "-hls_list_size", "5",
-    #     "-hls_flags", "delete_segments",
-    #     output_file
-    # ]
-    # subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-
     cmd = [
-        "ffmpeg", "-rtsp_transport", "tcp",
+        "ffmpeg", "-y",
         "-i", source_url,
-        "-fflags", "flush_packets",
-        "-max_delay", "0",
-
-        "-c:v", "copy",
-        "-c:a", "aac",
-
+        "-c", "copy",
         "-f", "hls",
-        "-hls_time", "2",
-        "-hls_list_size", "10",
+        "-hls_time", "4",
+        "-hls_list_size", "5",
         "-hls_flags", "delete_segments",
         output_file
     ]
+    subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
 def remove_old_streams():
