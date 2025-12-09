@@ -38,49 +38,27 @@ def create_hls_folder(stream_id: str):
     os.makedirs(folder, exist_ok=True)
     return folder
 
-# def run_ffmpeg_to_hls(source_url: str, stream_id: str):
-#     """Jalankan FFmpeg untuk mengubah stream ke HLS dengan logging"""
-#     output_dir = create_hls_folder(stream_id)
-#     output_file = os.path.join(output_dir, "index.m3u8")
-#     log_file = os.path.join(output_dir, "ffmpeg.log")
-
-#     cmd = [
-#         "ffmpeg", "-y",
-#         "-i", source_url,
-#         "-c", "copy",
-#         "-f", "hls",
-#         "-hls_time", "4",
-#         "-hls_list_size", "5",
-#         "-hls_flags", "delete_segments",
-#         output_file
-#     ]
-
-#     with open(log_file, "w", encoding="utf-8") as f:
-#         # simpan stdout dan stderr ke file log
-#         subprocess.Popen(cmd, stdout=f, stderr=f)
-
 def run_ffmpeg_to_hls(source_url: str, stream_id: str):
     """Jalankan FFmpeg untuk mengubah stream ke HLS dengan logging"""
-    try:
-        output_dir = create_hls_folder(stream_id)
-        output_file = os.path.join(output_dir, "index.m3u8")
-        log_file = os.path.join(output_dir, "ffmpeg.log")
+    output_dir = create_hls_folder(stream_id)
+    output_file = os.path.join(output_dir, "index.m3u8")
+    log_file = os.path.join(output_dir, "ffmpeg.log")
 
-        cmd = [
-            "ffmpeg", "-y",
-            "-i", source_url,
-            "-c", "copy",
-            "-f", "hls",
-            "-hls_time", "4",
-            "-hls_list_size", "5",
-            "-hls_flags", "delete_segments",
-            output_file
-        ]
+    cmd = [
+        "ffmpeg", "-y",
+        "-i", source_url,
+        "-c", "copy",
+        "-f", "hls",
+        "-hls_time", "4",
+        "-hls_list_size", "5",
+        "-hls_flags", "delete_segments",
+        output_file
+    ]
 
-        with open(log_file, "w", encoding="utf-8") as f:
-            subprocess.Popen(cmd, stdout=f, stderr=f)
-    except Exception as e:
-        print(f"[FFMPEG ERROR] Stream {stream_id}: {e}")
+    with open(log_file, "w", encoding="utf-8") as f:
+        # simpan stdout dan stderr ke file log
+        subprocess.Popen(cmd, stdout=f, stderr=f)
+
 
 # def run_ffmpeg_to_hls(source_url: str, stream_id: str):
 #     """Jalankan FFmpeg untuk mengubah stream ke HLS"""
