@@ -38,27 +38,6 @@ def create_hls_folder(stream_id: str):
     os.makedirs(folder, exist_ok=True)
     return folder
 
-def run_ffmpeg_to_hls(source_url: str, stream_id: str):
-    """Jalankan FFmpeg untuk mengubah stream ke HLS dengan logging"""
-    output_dir = create_hls_folder(stream_id)
-    output_file = os.path.join(output_dir, "index.m3u8")
-    log_file = os.path.join(output_dir, "ffmpeg.log")
-
-    cmd = [
-        "ffmpeg", "-y",
-        "-i", source_url,
-        "-c", "copy",
-        "-f", "hls",
-        "-hls_time", "4",
-        "-hls_list_size", "5",
-        "-hls_flags", "delete_segments",
-        output_file
-    ]
-
-    with open(log_file, "w", encoding="utf-8") as f:
-        # simpan stdout dan stderr ke file log
-        subprocess.Popen(cmd, stdout=f, stderr=f)
-
 
 # def run_ffmpeg_to_hls(source_url: str, stream_id: str):
 #     """Jalankan FFmpeg untuk mengubah stream ke HLS"""
@@ -172,34 +151,14 @@ def play_stream(stream_id):
 
     hls_path = os.path.join(BASE_HLS_DIR, stream_id, "index.m3u8")
 
-    # # tunggu sampai file m3u8 siap
-    # for _ in range(10):
-    #     if os.path.exists(hls_path):
-    #         break
-    #     time.sleep(1)
+    # tunggu sampai file m3u8 siap
+    for _ in range(10):
+        if os.path.exists(hls_path):
+            break
+        time.sleep(1)
 
-    # if not os.path.exists(hls_path):
-    #     return f"<h2>Stream {stream_id} belum siap. Coba lagi beberapa detik lagi.</h2>", 503
-
-# tunggu sampai file m3u8 siap
-for _ in range(10):
-    if os.path.exists(hls_path):
-        break
-    time.sleep(1)
-
-if not os.path.exists(hls_path):
-    # baca log FFmpeg untuk debug
-    log_file = os.path.join(BASE_HLS_DIR, stream_id, "ffmpeg.log")
-    log_content = ""
-    if os.path.exists(log_file):
-        with open(log_file, "r", encoding="utf-8") as f:
-            log_content = f.read()[-1000:]  # ambil 1000 karakter terakhir log
-    return f"""
-    <h2>Stream {stream_id} belum siap. Coba lagi beberapa detik lagi.</h2>
-    <pre style="color:red; background:#000; padding:10px; max-height:300px; overflow:auto;">
-    {log_content}
-    </pre>
-    """, 503
+    if not os.path.exists(hls_path):
+        return f"<h2>Stream {stream_id} belum siap. Coba lagi beberapa detik lagi.</h2>", 503
 
     hls_url = f"/static/hls/{stream_id}/index.m3u8"
 

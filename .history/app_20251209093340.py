@@ -172,34 +172,14 @@ def play_stream(stream_id):
 
     hls_path = os.path.join(BASE_HLS_DIR, stream_id, "index.m3u8")
 
-    # # tunggu sampai file m3u8 siap
-    # for _ in range(10):
-    #     if os.path.exists(hls_path):
-    #         break
-    #     time.sleep(1)
+    # tunggu sampai file m3u8 siap
+    for _ in range(10):
+        if os.path.exists(hls_path):
+            break
+        time.sleep(1)
 
-    # if not os.path.exists(hls_path):
-    #     return f"<h2>Stream {stream_id} belum siap. Coba lagi beberapa detik lagi.</h2>", 503
-
-# tunggu sampai file m3u8 siap
-for _ in range(10):
-    if os.path.exists(hls_path):
-        break
-    time.sleep(1)
-
-if not os.path.exists(hls_path):
-    # baca log FFmpeg untuk debug
-    log_file = os.path.join(BASE_HLS_DIR, stream_id, "ffmpeg.log")
-    log_content = ""
-    if os.path.exists(log_file):
-        with open(log_file, "r", encoding="utf-8") as f:
-            log_content = f.read()[-1000:]  # ambil 1000 karakter terakhir log
-    return f"""
-    <h2>Stream {stream_id} belum siap. Coba lagi beberapa detik lagi.</h2>
-    <pre style="color:red; background:#000; padding:10px; max-height:300px; overflow:auto;">
-    {log_content}
-    </pre>
-    """, 503
+    if not os.path.exists(hls_path):
+        return f"<h2>Stream {stream_id} belum siap. Coba lagi beberapa detik lagi.</h2>", 503
 
     hls_url = f"/static/hls/{stream_id}/index.m3u8"
 
