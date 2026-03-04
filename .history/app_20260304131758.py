@@ -97,7 +97,7 @@ def try_terminate_ffmpeg_for_folder(target_folder: str) -> bool:
 
     return found
 
-# for production, consider adding more robust error handling/logging around the ffmpeg process management,
+
 # def run_ffmpeg_to_hls(source_url: str, stream_id: str):
 #     output_dir = create_hls_folder(stream_id)
 #     output_file = os.path.join(output_dir, "index.m3u8")
@@ -745,8 +745,8 @@ def renew_stream(token):
 
 #     serve(app, host="0.0.0.0", port=2881)
 
-if __name__ == "__main__":
-    from waitress import serve
-    Thread(target=auto_cleanup_hls, daemon=True).start()
+# if __name__ == "__main__":
+#     from waitress import serve
+#     Thread(target=auto_cleanup_hls, daemon=True).start()
 
-    app.run(host="0.0.0.0", port=2881, debug=True)
+#     app.run(host="0.0.0.0", port=2881, debug=True)

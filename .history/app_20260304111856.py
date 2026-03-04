@@ -97,57 +97,6 @@ def try_terminate_ffmpeg_for_folder(target_folder: str) -> bool:
 
     return found
 
-# for production, consider adding more robust error handling/logging around the ffmpeg process management,
-# def run_ffmpeg_to_hls(source_url: str, stream_id: str):
-#     output_dir = create_hls_folder(stream_id)
-#     output_file = os.path.join(output_dir, "index.m3u8")
-#     log_file = os.path.join(output_dir, "ffmpeg.log")
-
-#     ffmpeg_path = r"C:\ffmpeg\bin\ffmpeg.exe"
-
-#     cmd = [
-#         ffmpeg_path, "-y",
-#         "-i", source_url,
-#         "-c", "copy",
-#         "-f", "hls",
-#         "-hls_time", "4",
-#         "-hls_list_size", "5",
-#         "-hls_flags", "delete_segments",
-#         output_file
-#     ]
-
-#     # start ffmpeg and keep the process handle so we can terminate it later
-#     try:
-#         f = open(log_file, "w", encoding="utf-8")
-#     except Exception:
-#         f = None
-
-#     try:
-#         if f:
-#             proc = subprocess.Popen(cmd, stdout=f, stderr=f)
-#         else:
-#             proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-
-#         # register process in active_streams if entry exists
-#         if stream_id in active_streams:
-#             active_streams[stream_id]["proc"] = proc
-
-#         try:
-#             proc.wait()
-#         except Exception:
-#             pass
-
-#     finally:
-#         try:
-#             if f:
-#                 f.close()
-#         except Exception:
-#             pass
-
-#         # cleanup process handle reference when ffmpeg ends
-#         if stream_id in active_streams:
-#             active_streams[stream_id].pop("proc", None)
-
 
 def run_ffmpeg_to_hls(source_url: str, stream_id: str):
     output_dir = create_hls_folder(stream_id)
@@ -207,7 +156,7 @@ def remove_old_streams():
         viewers = info.get("viewers", 0)
 
         # remove when age exceeded and there are no active viewers
-        if age_minutes > EXPIRE_MINUTES:
+        if age_minutes > EXPIRE_MINUTES and viewers == 0:
             folder = get_stream_folder(stream_id)
             try:
                 # if we started ffmpeg for this stream, ensure the process is stopped first
@@ -303,23 +252,23 @@ def generate_token(camera_id):
     return match.group(1)
 
 
-@app.route("/generateLinkIOS")
-def generate_link_ios():
-    camera_id = request.args.get("cameraId")
-    if not camera_id:
-        return jsonify({"error": "cameraId wajib diisi"}), 400
+# @app.route("/generateLinkIOS")
+# def generate_link_ios():
+#     camera_id = request.args.get("cameraId")
+#     if not camera_id:
+#         return jsonify({"error": "cameraId wajib diisi"}), 400
 
-    try:
-        token = generate_token(camera_id)
-        token_to_camera[token] = camera_id
+#     try:
+#         token = generate_token(camera_id)
+#         token_to_camera[token] = camera_id
 
-        return jsonify({
-            "cameraId": camera_id,
-            "streamingUrl": f"{request.host_url}livestream/iOS/{token}"
-        })
+#         return jsonify({
+#             "cameraId": camera_id,
+#             "streamingUrl": f"{request.host_url}livestream/iOS/{token}"
+#         })
 
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+#     except Exception as e:
+#         return jsonify({"error": str(e)}), 500
 
 
 @app.route("/livestream/iOS/<token>")

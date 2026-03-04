@@ -54,101 +54,6 @@ def is_hls(url: str) -> bool:
     return ".m3u8" in url.lower()
 
 
-def try_terminate_ffmpeg_for_folder(target_folder: str) -> bool:
-    """Best-effort: find ffmpeg processes whose command line references
-    the given folder and terminate/kill them. Returns True if any were
-    signaled."""
-    found = False
-    if not psutil:
-        return False
-
-    for proc in psutil.process_iter(attrs=("name", "cmdline")):
-        try:
-            pname = (proc.info.get("name") or "").lower()
-            if "ffmpeg" not in pname:
-                continue
-            cmdline = " ".join(proc.info.get("cmdline") or [])
-            if target_folder in cmdline:
-                found = True
-                try:
-                    proc.terminate()
-                except Exception:
-                    pass
-        except Exception:
-            # ignore inspection errors
-            pass
-
-    if found:
-        # allow short time for exit, then force-kill remaining
-        for proc in psutil.process_iter(attrs=("name", "cmdline")):
-            try:
-                pname = (proc.info.get("name") or "").lower()
-                cmdline = " ".join(proc.info.get("cmdline") or [])
-                if "ffmpeg" in pname and target_folder in cmdline:
-                    try:
-                        proc.wait(timeout=3)
-                    except Exception:
-                        try:
-                            proc.kill()
-                        except Exception:
-                            pass
-            except Exception:
-                pass
-
-    return found
-
-# for production, consider adding more robust error handling/logging around the ffmpeg process management,
-# def run_ffmpeg_to_hls(source_url: str, stream_id: str):
-#     output_dir = create_hls_folder(stream_id)
-#     output_file = os.path.join(output_dir, "index.m3u8")
-#     log_file = os.path.join(output_dir, "ffmpeg.log")
-
-#     ffmpeg_path = r"C:\ffmpeg\bin\ffmpeg.exe"
-
-#     cmd = [
-#         ffmpeg_path, "-y",
-#         "-i", source_url,
-#         "-c", "copy",
-#         "-f", "hls",
-#         "-hls_time", "4",
-#         "-hls_list_size", "5",
-#         "-hls_flags", "delete_segments",
-#         output_file
-#     ]
-
-#     # start ffmpeg and keep the process handle so we can terminate it later
-#     try:
-#         f = open(log_file, "w", encoding="utf-8")
-#     except Exception:
-#         f = None
-
-#     try:
-#         if f:
-#             proc = subprocess.Popen(cmd, stdout=f, stderr=f)
-#         else:
-#             proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-
-#         # register process in active_streams if entry exists
-#         if stream_id in active_streams:
-#             active_streams[stream_id]["proc"] = proc
-
-#         try:
-#             proc.wait()
-#         except Exception:
-#             pass
-
-#     finally:
-#         try:
-#             if f:
-#                 f.close()
-#         except Exception:
-#             pass
-
-#         # cleanup process handle reference when ffmpeg ends
-#         if stream_id in active_streams:
-#             active_streams[stream_id].pop("proc", None)
-
-
 def run_ffmpeg_to_hls(source_url: str, stream_id: str):
     output_dir = create_hls_folder(stream_id)
     output_file = os.path.join(output_dir, "index.m3u8")
@@ -207,7 +112,7 @@ def remove_old_streams():
         viewers = info.get("viewers", 0)
 
         # remove when age exceeded and there are no active viewers
-        if age_minutes > EXPIRE_MINUTES:
+        if age_minutes > EXPIRE_MINUTES and viewers == 0:
             folder = get_stream_folder(stream_id)
             try:
                 # if we started ffmpeg for this stream, ensure the process is stopped first
@@ -247,6 +152,41 @@ def remove_old_streams():
 
             age_minutes = (now - mtime).total_seconds() / 60
             if age_minutes > EXPIRE_MINUTES:
+                # attempt to stop ffmpeg processes that reference this folder (if any)
+                def try_terminate_ffmpeg_for_folder(target_folder):
+                    found = False
+                    if psutil:
+                        for proc in psutil.process_iter(attrs=("name", "cmdline")):
+                            try:
+                                pname = (proc.info.get("name") or "").lower()
+                                if "ffmpeg" not in pname:
+                                    continue
+                                cmdline = " ".join(proc.info.get("cmdline") or [])
+                                if target_folder in cmdline:
+                                    found = True
+                                    try:
+                                        proc.terminate()
+                                    except Exception:
+                                        pass
+                            except Exception:
+                                # ignore process inspection errors and continue
+                                pass
+                        if found:
+                            # wait short while for processes to exit, then kill remaining
+                            for proc in psutil.process_iter(attrs=("name", "cmdline")):
+                                try:
+                                    pname = (proc.info.get("name") or "").lower()
+                                    cmdline = " ".join(proc.info.get("cmdline") or [])
+                                    if "ffmpeg" in pname and target_folder in cmdline:
+                                        try:
+                                            proc.wait(timeout=3)
+                                        except Exception:
+                                            try:
+                                                proc.kill()
+                                            except Exception:
+                                                pass
+                    return found
+
                 try:
                     # try to terminate ffmpeg processes referencing this folder (best-effort)
                     try_terminate_ffmpeg_for_folder(folder)
@@ -303,23 +243,23 @@ def generate_token(camera_id):
     return match.group(1)
 
 
-@app.route("/generateLinkIOS")
-def generate_link_ios():
-    camera_id = request.args.get("cameraId")
-    if not camera_id:
-        return jsonify({"error": "cameraId wajib diisi"}), 400
+# @app.route("/generateLinkIOS")
+# def generate_link_ios():
+#     camera_id = request.args.get("cameraId")
+#     if not camera_id:
+#         return jsonify({"error": "cameraId wajib diisi"}), 400
 
-    try:
-        token = generate_token(camera_id)
-        token_to_camera[token] = camera_id
+#     try:
+#         token = generate_token(camera_id)
+#         token_to_camera[token] = camera_id
 
-        return jsonify({
-            "cameraId": camera_id,
-            "streamingUrl": f"{request.host_url}livestream/iOS/{token}"
-        })
+#         return jsonify({
+#             "cameraId": camera_id,
+#             "streamingUrl": f"{request.host_url}livestream/iOS/{token}"
+#         })
 
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+#     except Exception as e:
+#         return jsonify({"error": str(e)}), 500
 
 
 @app.route("/livestream/iOS/<token>")
