@@ -1,0 +1,43 @@
+ffmpeg version 8.0.1-full_build-www.gyan.dev Copyright (c) 2000-2025 the FFmpeg developers
+  built with gcc 15.2.0 (Rev8, Built by MSYS2 project)
+  configuration: --enable-gpl --enable-version3 --enable-static --disable-w32threads --disable-autodetect --enable-fontconfig --enable-iconv --enable-gnutls --enable-lcms2 --enable-libxml2 --enable-gmp --enable-bzlib --enable-lzma --enable-libsnappy --enable-zlib --enable-librist --enable-libsrt --enable-libssh --enable-libzmq --enable-avisynth --enable-libbluray --enable-libcaca --enable-libdvdnav --enable-libdvdread --enable-sdl2 --enable-libaribb24 --enable-libaribcaption --enable-libdav1d --enable-libdavs2 --enable-libopenjpeg --enable-libquirc --enable-libuavs3d --enable-libxevd --enable-libzvbi --enable-liboapv --enable-libqrencode --enable-librav1e --enable-libsvtav1 --enable-libvvenc --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxavs2 --enable-libxeve --enable-libxvid --enable-libaom --enable-libjxl --enable-libvpx --enable-mediafoundation --enable-libass --enable-frei0r --enable-libfreetype --enable-libfribidi --enable-libharfbuzz --enable-liblensfun --enable-libvidstab --enable-libvmaf --enable-libzimg --enable-amf --enable-cuda-llvm --enable-cuvid --enable-dxva2 --enable-d3d11va --enable-d3d12va --enable-ffnvcodec --enable-libvpl --enable-nvdec --enable-nvenc --enable-vaapi --enable-libshaderc --enable-vulkan --enable-libplacebo --enable-opencl --enable-libcdio --enable-openal --enable-libgme --enable-libmodplug --enable-libopenmpt --enable-libopencore-amrwb --enable-libmp3lame --enable-libshine --enable-libtheora --enable-libtwolame --enable-libvo-amrwbenc --enable-libcodec2 --enable-libilbc --enable-libgsm --enable-liblc3 --enable-libopencore-amrnb --enable-libopus --enable-libspeex --enable-libvorbis --enable-ladspa --enable-libbs2b --enable-libflite --enable-libmysofa --enable-librubberband --enable-libsoxr --enable-chromaprint --enable-whisper
+  libavutil      60.  8.100 / 60.  8.100
+  libavcodec     62. 11.100 / 62. 11.100
+  libavformat    62.  3.100 / 62.  3.100
+  libavdevice    62.  1.100 / 62.  1.100
+  libavfilter    11.  4.100 / 11.  4.100
+  libswscale      9.  1.100 /  9.  1.100
+  libswresample   6.  1.100 /  6.  1.100
+Input #0, mov,mp4,m4a,3gp,3g2,mj2, from 'https://i-see.iconpln.co.id/mulmed/media?session=AYEAfv8KECOXNZxNekIXuBp9hc5vb7kSFgoUp__ofBwJ_wdMLYxlSy3Kybl2R-YaELXudiLl_E-ZuE2NzyWnU5kiEDwa0yUXIkQTr36JlI5hhPwqDkNDVFYtUExOIFBVU0FUMiEaEE2erIRywEb_v4iN8kVXy1cqDWFkbWluaXN0cmF0b3I&cameraId=4xIx1EtKtkwyTU00SbNMMdVLTsw1MBASiDLdu-1pvt-7vZ2b-yLfGDIBAA&format=fmp4&frames=all&media=video&t=live':
+  Metadata:
+    major_brand     : iso5
+    minor_version   : 512
+    compatible_brands: iso5iso6mp41
+    date            : 20260304T071905.892Z
+    encoder         : Lavf58.45.100
+  Duration: 00:00:01.16, start: 0.000000, bitrate: N/A
+  Stream #0:0[0x1](und): Video: h264 (Main) (avc1 / 0x31637661), yuvj420p(pc, bt709, progressive), 1920x1080, 1221 kb/s, 1.32 fps, 25 tbr, 100k tbn (default)
+    Metadata:
+      handler_name    : VideoHandler
+      vendor_id       : [0][0][0][0]
+Stream mapping:
+  Stream #0:0 -> #0:0 (copy)
+Output #0, hls, to 'C:\Users\Haris\Documents\Work Project\python\hls_converter\static\hls\bbb001ba00\index.m3u8':
+  Metadata:
+    major_brand     : iso5
+    minor_version   : 512
+    compatible_brands: iso5iso6mp41
+    date            : 20260304T071905.892Z
+    encoder         : Lavf62.3.100
+  Stream #0:0(und): Video: h264 (Main) (avc1 / 0x31637661), yuvj420p(pc, bt709, progressive), 1920x1080, q=2-31, 1221 kb/s, 1.32 fps, 25 tbr, 90k tbn (default)
+    Metadata:
+      handler_name    : VideoHandler
+      vendor_id       : [0][0][0][0]
+Press [q] to stop, [?] for help
+frame=    8 fps=0.0 q=-1.0 size=N/A time=00:00:01.15 bitrate=N/A speed=2.25x elapsed=0:00:00.51    frame=   17 fps= 17 q=-1.0 size=N/A time=00:00:01.63 bitrate=N/A speed=1.59x elapsed=0:00:01.03    frame=   17 fps= 11 q=-1.0 size=N/A time=00:00:01.63 bitrate=N/A speed=1.06x elapsed=0:00:01.54    frame=   24 fps= 12 q=-1.0 size=N/A time=00:00:02.03 bitrate=N/A speed=0.991x elapsed=0:00:02.05    frame=   31 fps= 12 q=-1.0 size=N/A time=00:00:02.39 bitrate=N/A speed=0.933x elapsed=0:00:02.57    frame=   31 fps= 10 q=-1.0 size=N/A time=00:00:02.39 bitrate=N/A speed=0.776x elapsed=0:00:03.09    frame=   31 fps=8.6 q=-1.0 size=N/A time=00:00:02.39 bitrate=N/A speed=0.664x elapsed=0:00:03.60    frame=   32 fps=7.8 q=-1.0 size=N/A time=00:00:02.47 bitrate=N/A speed= 0.6x elapsed=0:00:04.12    frame=   39 fps=8.4 q=-1.0 size=N/A time=00:00:02.87 bitrate=N/A speed=0.62x elapsed=0:00:04.64    frame=   47 fps=9.1 q=-1.0 size=N/A time=00:00:03.31 bitrate=N/A speed=0.644x elapsed=0:00:05.15    frame=   53 fps=9.4 q=-1.0 size=N/A time=00:00:03.63 bitrate=N/A speed=0.642x elapsed=0:00:05.66    frame=   60 fps=9.7 q=-1.0 size=N/A time=00:00:04.03 bitrate=N/A speed=0.653x elapsed=0:00:06.18    frame=   61 fps=9.1 q=-1.0 size=N/A time=00:00:04.07 bitrate=N/A speed=0.609x elapsed=0:00:06.70    [hls @ 0000017f86e96140] Opening 'C:\Users\Haris\Documents\Work Project\python\hls_converter\static\hls\bbb001ba00\index0.ts' for writing
+[hls @ 0000017f86e96140] Opening 'C:\Users\Haris\Documents\Work Project\python\hls_converter\static\hls\bbb001ba00\index.m3u8.tmp' for writing
+frame=   75 fps= 10 q=-1.0 size=N/A time=00:00:04.83 bitrate=N/A speed=0.671x elapsed=0:00:07.21    frame=   89 fps= 11 q=-1.0 size=N/A time=00:00:05.63 bitrate=N/A speed=0.728x elapsed=0:00:07.73    frame=   89 fps= 11 q=-1.0 size=N/A time=00:00:05.63 bitrate=N/A speed=0.684x elapsed=0:00:08.24    frame=   89 fps= 10 q=-1.0 size=N/A time=00:00:05.63 bitrate=N/A speed=0.643x elapsed=0:00:08.76    frame=   89 fps=9.6 q=-1.0 size=N/A time=00:00:05.63 bitrate=N/A speed=0.608x elapsed=0:00:09.27    frame=   89 fps=9.1 q=-1.0 size=N/A time=00:00:05.63 bitrate=N/A speed=0.576x elapsed=0:00:09.78    frame=   91 fps=8.8 q=-1.0 size=N/A time=00:00:05.75 bitrate=N/A speed=0.558x elapsed=0:00:10.31    frame=   91 fps=8.4 q=-1.0 size=N/A time=00:00:05.75 bitrate=N/A speed=0.532x elapsed=0:00:10.82    frame=   91 fps=8.0 q=-1.0 size=N/A time=00:00:05.75 bitrate=N/A speed=0.508x elapsed=0:00:11.34    frame=   91 fps=7.7 q=-1.0 size=N/A time=00:00:05.75 bitrate=N/A speed=0.486x elapsed=0:00:11.85    frame=   91 fps=7.4 q=-1.0 size=N/A time=00:00:05.75 bitrate=N/A speed=0.465x elapsed=0:00:12.37    frame=   91 fps=7.1 q=-1.0 size=N/A time=00:00:05.75 bitrate=N/A speed=0.447x elapsed=0:00:12.88    frame=   91 fps=6.8 q=-1.0 size=N/A time=00:00:05.75 bitrate=N/A speed=0.43x elapsed=0:00:13.39    frame=   91 fps=6.5 q=-1.0 size=N/A time=00:00:05.75 bitrate=N/A speed=0.414x elapsed=0:00:13.92    frame=   97 fps=6.7 q=-1.0 size=N/A time=00:00:06.07 bitrate=N/A speed=0.421x elapsed=0:00:14.42    frame=  102 fps=6.8 q=-1.0 size=N/A time=00:00:06.35 bitrate=N/A speed=0.425x elapsed=0:00:14.95    frame=  109 fps=7.0 q=-1.0 size=N/A time=00:00:06.75 bitrate=N/A speed=0.437x elapsed=0:00:15.46    [hls @ 0000017f86e96140] Opening 'C:\Users\Haris\Documents\Work Project\python\hls_converter\static\hls\bbb001ba00\index1.ts' for writing
+[hls @ 0000017f86e96140] Opening 'C:\Users\Haris\Documents\Work Project\python\hls_converter\static\hls\bbb001ba00\index.m3u8.tmp' for writing
+[out#0/hls @ 0000017f869cd500] video:1539KiB audio:0KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: unknown
+frame=  118 fps=7.4 q=-1.0 Lsize=N/A time=00:00:07.23 bitrate=N/A speed=0.452x elapsed=0:00:16.03    
+Exiting normally, received signal 2.
