@@ -1,0 +1,11 @@
+
+nssm restart HLSConverter
+
+nssm stop HLSConverter
+
+C:\cctv\hls_converter>
+
+install
+- python
+- nssm
+- flask requests flask-cors

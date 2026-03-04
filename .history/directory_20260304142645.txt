@@ -1,0 +1,16 @@
+
+nssm restart HLSConverter
+
+nssm stop HLSConverter
+
+C:\cctv\hls_converter>
+
+install
+- ffmpeg
+- python 3.12
+- nssm
+- flask requests flask-cors
+- waitress
+
+
+cek nat 
