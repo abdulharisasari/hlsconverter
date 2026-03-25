@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Live Stream</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+    <style>
+        body {
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        video {
+            width: 80%;
+            max-width: 900px;
+            border-radius: 12px;
+        }
+
+        #loading {
+            display:flex;
+            position:fixed;
+            inset:0;
+            align-items:center;
+            justify-content:center;
+            background:rgba(0,0,0,0.6);
+            z-index:9999;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+
+<body>
+
+<video id="video" controls autoplay muted></video>
+
+<div id="loading">
+    <div style="text-align:center;color:#fff;">
+        <div style="width:48px;height:48px;margin:0 auto 12px;border:4px solid rgba(255,255,255,0.2);border-top-color:#fff;border-radius:50%;animation:spin 1s linear infinite"></div>
+        <div id="loadingText">Loading stream...</div>
+    </div>
+</div>
+
+<script>
+    const video = document.getElementById('video');
+
+    let src = "{{ hls_url }}";
+    let streamId = "{{ stream_id }}";
+    let token = "{{ token }}";
+
+    let hlsInstance = null;
+    let playerStarted = false;
+
+    const loadingEl = document.getElementById('loading');
+
+    function showLoading(text) {
+        const t = document.getElementById('loadingText');
+        if (t && text) t.textContent = text;
+        loadingEl.style.display = 'flex';
+    }
+
+    function hideLoading() {
+        loadingEl.style.display = 'none';
+    }
+
+    async function checkReady() {
+        if (playerStarted) return;
+
+        showLoading('Waiting for stream...');
+
+        try {
+            const res = await fetch("/stream-ready/" + streamId);
+            const data = await res.json();
+
+            if (data.ready) {
+                playerStarted = true;
+                hideLoading();
+                startPlayer(src);
+            } else {
+                setTimeout(checkReady, 1000);
+            }
+        } catch (e) {
+            setTimeout(checkReady, 1000);
+        }
+    }
+
+    async function startPlayer() {
+    const ready = await waitStream();
+
+    if (!ready) {
+        loading.innerHTML = "<h3>Stream tidak tersedia / offline</h3>";
+        return;
+    }
+
+    if (Hls.isSupported()) {
+        const hls = new Hls({
+            maxBufferLength: 10,
+            liveSyncDuration: 3
+        });
+
+        hls.loadSource(hlsUrl);
+        hls.attachMedia(video);
+
+        // ✅ HIDE loading saat video beneran mulai
+        video.addEventListener('playing', () => {
+            loading.style.display = "none";
+        });
+
+        hls.on(Hls.Events.ERROR, function (event, data) {
+            console.error("HLS error:", data);
+
+            if (data.fatal) {
+                loading.style.display = "block";
+                loading.innerHTML = "<h3>Stream error, mencoba reconnect...</h3>";
+
+                setTimeout(startPlayer, 2000);
+            }
+        });
+
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = hlsUrl;
+
+        video.addEventListener('playing', () => {
+            loading.style.display = "none";
+        });
+    }
+}
+
+    if (src && src.includes(".m3u8")) {
+        startPlayer(src);
+        playerStarted = true;
+    } else {
+        checkReady();
+    }
+
+    // ping
+    setInterval(() => {
+        fetch('/ping/' + streamId);
+    }, 30000);
+
+    // close event
+    window.addEventListener('beforeunload', function() {
+        navigator.sendBeacon('/close/' + streamId);
+    });
+
+</script>
+
+</body>
+</html>
