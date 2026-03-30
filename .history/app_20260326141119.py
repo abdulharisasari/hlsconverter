@@ -250,59 +250,59 @@ def player(token):
 
     <video id="video" controls autoplay muted style="width:80%"></video>
 
-    <script>
-    let token = "{{token}}"
-    let streamId = null
-    let video = document.getElementById("video")
+<script>
+let token = "{{token}}"
+let streamId = null
+let video = document.getElementById("video")
 
-    async function waitReady(id){
-        while(true){
-            let r = await fetch("/stream-ready/" + id)
-            let d = await r.json()
-            if(d.ready) return
-            await new Promise(r=>setTimeout(r,1000))
-        }
+async function waitReady(id){
+    while(true){
+        let r = await fetch("/stream-ready/" + id)
+        let d = await r.json()
+        if(d.ready) return
+        await new Promise(r=>setTimeout(r,1000))
+    }
+}
+
+async function start(){
+    let res = await fetch("/start-stream/" + token)
+    let data = await res.json()
+
+    if(!data.ok){
+        alert("stream gagal")
+        return
     }
 
-    async function start(){
-        let res = await fetch("/start-stream/" + token)
-        let data = await res.json()
+    streamId = data.stream_id
 
-        if(!data.ok){
-            alert("stream gagal")
-            return
-        }
+    await waitReady(streamId)
 
-        streamId = data.stream_id
+    fetch("/open/" + streamId, {method:"POST"})
 
-        await waitReady(streamId)
+    setInterval(()=>{
+        fetch("/ping/" + streamId)
+    },5000)
 
-        fetch("/open/" + streamId, {method:"POST"})
+    if(Hls.isSupported()){
+        let hls = new Hls()
+        hls.loadSource(data.hls_url)
+        hls.attachMedia(video)
 
-        setInterval(()=>{
-            fetch("/ping/" + streamId)
-        },5000)
+        hls.on(Hls.Events.ERROR, function (event, data) {
+            console.log("HLS ERROR:", data);
+        });
 
-        if(Hls.isSupported()){
-            let hls = new Hls()
-            hls.loadSource(data.hls_url)
-            hls.attachMedia(video)
-
-            hls.on(Hls.Events.ERROR, function (event, data) {
-                console.log("HLS ERROR:", data);
-            });
-
-        }else{
-            video.src = data.hls_url
-        }
+    }else{
+        video.src = data.hls_url
     }
+}
 
-    window.addEventListener("beforeunload", ()=>{
-        navigator.sendBeacon("/close/" + streamId)
-    })
+window.addEventListener("beforeunload", ()=>{
+    navigator.sendBeacon("/close/" + streamId)
+})
 
-    start()
-    </script>
+start()
+</script>
     </body>
     </html>
     """, token=token)

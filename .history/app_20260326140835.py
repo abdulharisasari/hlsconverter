@@ -239,7 +239,7 @@ def ready(stream_id):
 # PLAYER
 # ==============================
 
-@app.route("/livestream/iOS/<token>")
+@app.route("/livestream/<token>")
 def player(token):
     return render_template_string("""
     <html>
@@ -255,27 +255,11 @@ def player(token):
     let streamId = null
     let video = document.getElementById("video")
 
-    async function waitReady(id){
-        while(true){
-            let r = await fetch("/stream-ready/" + id)
-            let d = await r.json()
-            if(d.ready) return
-            await new Promise(r=>setTimeout(r,1000))
-        }
-    }
-
     async function start(){
         let res = await fetch("/start-stream/" + token)
         let data = await res.json()
 
-        if(!data.ok){
-            alert("stream gagal")
-            return
-        }
-
         streamId = data.stream_id
-
-        await waitReady(streamId)
 
         fetch("/open/" + streamId, {method:"POST"})
 
@@ -287,11 +271,6 @@ def player(token):
             let hls = new Hls()
             hls.loadSource(data.hls_url)
             hls.attachMedia(video)
-
-            hls.on(Hls.Events.ERROR, function (event, data) {
-                console.log("HLS ERROR:", data);
-            });
-
         }else{
             video.src = data.hls_url
         }
