@@ -1,5 +1,5 @@
 directory
-server kutai timur
+server 
 - C:\cctv\hls_converter>
 
 server mulmed
