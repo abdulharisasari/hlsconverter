@@ -1,5 +1,8 @@
 directory
+server 
 - C:\cctv\hls_converter>
+
+server mulmed
 - C:\Users\dev.isee\livestream\IOS\hlsconverter
 
 run/stop as a service

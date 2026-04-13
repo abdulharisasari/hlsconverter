@@ -1,8 +1,0 @@
-
-nssm restart HLSConverter
-
-nssm stop HLSConverter
-
-C:\cctv\hls_converter>
-
-install
